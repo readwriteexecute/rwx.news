@@ -19,15 +19,6 @@
 vendor/bundle
 public/assets
 
-# templates to be created per-site
-app/views/home/privacy.*
-app/views/home/about.*
-app/views/home/chat.*
-app/views/home/404.*
-app/assets/stylesheets/local/*
-public/favicon.ico
-public/apple-touch-icon*
-
 # files added in production
 lib/tasks/deploy.rake
 config/initializers/production.rb
@@ -35,4 +26,13 @@ config/database.yml
 config/initializers/secret_token.rb
 config/*.sphinx.conf
 config/unicorn.conf.rb
+
+# rwx.news SMTP creds stored here
 config/initializers/email.rb
+
+# rwx.news console helper script w/ correct env vars
+script/console
+
+# rwx.news entrypoint that systemd -> unicorn is wired up to w/ correct env
+# vars and unicorn invocation
+.unicorn.sh
