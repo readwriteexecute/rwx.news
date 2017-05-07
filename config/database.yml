@@ -1,0 +1,13 @@
+development: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  reconnect: false
+  database: <%= ENV["MYSQL_DATABASE"] %>
+  host: db
+  port: 3306
+  username: <%= ENV["MYSQL_USERNAME"] %>
+  password: <%= ENV["MYSQL_PASSWORD"] %>
+
+test:
+  <<: *default
+  database: rwx_test
