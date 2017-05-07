@@ -1,12 +1,11 @@
 version: '2'
 services:
   db:
-    image: mysql
+    image: postgres
     ports:
-      - "3306:3306"
+      - "5432:5432"
     env_file:
       - 'config/.env'
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
   web:
     build: .
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
