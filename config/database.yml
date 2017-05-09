@@ -1,0 +1,12 @@
+development: &default
+  adapter: postgresql
+  reconnect: false
+  database: rwx_development
+  host: db
+  port: 5432
+  username: <%= ENV["POSTGRES_USER"] %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
+
+test:
+  <<: *default
+  database: rwx_test
