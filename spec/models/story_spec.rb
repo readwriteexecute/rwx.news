@@ -1,6 +1,77 @@
 require "spec_helper"
 
 describe Story do
+
+  describe "self.ready_for_deletion" do
+    it "includes stories older than 1 month" do
+      s = Story.make!(:created_at => 5.months.ago)
+      expect( Story.ready_for_deletion).to include(s)
+    end
+
+    it "does not include stories less than 1 month old" do
+      s = Story.make!(:created_at => 3.weeks.ago)
+
+      expect(Story.ready_for_deletion).to_not include(s)
+    end
+  end
+
+  describe "destroy" do
+    it "preserves users karma" do
+      submitter = User.make!
+      upvoter = User.make!
+      commenter = User.make!
+      comment_upvoter = User.make!
+      s = Story.make!(:user_id => submitter.id)
+      Vote.vote_thusly_on_story_or_comment_for_user_because(1, s.id, nil, upvoter.id, nil, true)
+      comment = Comment.make!(:story_id => s.id, :user_id => commenter.id)
+      Vote.vote_thusly_on_story_or_comment_for_user_because(1, s.id, comment.id, comment_upvoter.id, nil, true)
+      expect(submitter.reload.karma).to eq 1
+      expect(commenter.reload.karma).to eq 1
+
+      s.destroy
+
+      expect(submitter.reload.karma).to eq 1
+      expect(commenter.reload.karma).to eq 1
+    end
+
+    it "deletes a story's taggings" do
+      s = Story.make!(:tags_a => ["tag1"])
+
+      expect {
+        s.destroy
+      }.to change(Tagging, :count).by(-1)
+    end
+
+    it "deletes a story's comments" do
+      s = Story.make!(:comments => [Comment.make!])
+
+      expect {
+        s.destroy
+      }.to change(Comment, :count).by(-1)
+    end
+
+    it "deletes a story's votes" do
+      s = Story.make!
+
+      expect {
+        s.destroy
+      }.to change(Vote, :count).by(-1)
+    end
+
+    it "deletes a story's suggestions" do
+      s = Story.make!(
+        :suggested_taggings => [SuggestedTagging.make!],
+        :suggested_titles => [SuggestedTitle.make!]
+      )
+
+      expect {
+        expect {
+          s.destroy
+        }.to change(SuggestedTagging, :count).by(-1)
+      }.to change(SuggestedTitle, :count).by(-1)
+    end
+  end
+
   it "should get a short id" do
     s = Story.make!(:title => "hello", :url => "http://example.com/")
 

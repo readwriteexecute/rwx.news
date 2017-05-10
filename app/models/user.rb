@@ -91,13 +91,6 @@ class User < ActiveRecord::Base
   # minimum karma required to be able to submit new stories
   MIN_KARMA_TO_SUBMIT_STORIES = -4
 
-  def self.recalculate_all_karmas!
-    User.all.each do |u|
-      u.karma = u.stories.map(&:score).sum + u.comments.map(&:score).sum
-      u.save!
-    end
-  end
-
   def self.username_regex_s
     "/^" + VALID_USERNAME.to_s.gsub(/(\?-mix:|\(|\))/, "") + "$/"
   end

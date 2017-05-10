@@ -1,4 +1,5 @@
 class Story < ActiveRecord::Base
+  DELETION_INTERVAL = 1.month
   belongs_to :user
   belongs_to :merged_into_story,
     :class_name => "Story",
@@ -7,18 +8,27 @@ class Story < ActiveRecord::Base
     :class_name => "Story",
     :foreign_key => "merged_story_id"
   has_many :taggings,
-    :autosave => true
-  has_many :suggested_taggings
-  has_many :suggested_titles
+           :autosave => true,
+           :dependent => :delete_all
+  has_many :suggested_taggings,
+           :dependent => :delete_all
+  has_many :suggested_titles,
+           :dependent => :delete_all
   has_many :comments,
-    :inverse_of => :story
+           :inverse_of => :story,
+           :dependent => :delete_all
   has_many :tags, :through => :taggings
-  has_many :votes, -> { where(:comment_id => nil) }
+  has_many :votes,
+           -> { where(:comment_id => nil) },
+           :dependent => :delete_all
   has_many :voters, -> { where('votes.comment_id' => nil) },
     :through => :votes,
     :source => :user
 
+
+
   scope :unmerged, -> { where(:merged_story_id => nil) }
+  scope :ready_for_deletion, -> { where('created_at < ?', DELETION_INTERVAL.ago) }
 
   validates_length_of :title, :in => 3..150
   validates_length_of :description, :maximum => (64 * 1024)
