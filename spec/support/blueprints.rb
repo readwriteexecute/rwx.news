@@ -50,3 +50,15 @@ Vote.blueprint do
   user
   vote { 1 }
 end
+
+SuggestedTagging.blueprint do
+  tag
+  story
+  user
+end
+
+SuggestedTitle.blueprint do
+  story
+  user
+  title { "suggestion #{sn}"}
+end

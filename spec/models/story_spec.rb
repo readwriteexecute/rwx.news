@@ -15,6 +15,45 @@ describe Story do
     end
   end
 
+  describe "destroy" do
+    it "deletes a story's taggings" do
+      s = Story.make!(:tags_a => ["tag1"])
+
+      expect {
+        s.destroy
+      }.to change(Tagging, :count).by(-1)
+    end
+
+    it "deletes a story's comments" do
+      s = Story.make!(:comments => [Comment.make!])
+
+      expect {
+        s.destroy
+      }.to change(Comment, :count).by(-1)
+    end
+
+    it "deletes a story's votes" do
+      s = Story.make!
+
+      expect {
+        s.destroy
+      }.to change(Vote, :count).by(-1)
+    end
+
+    it "deletes a story's suggestions" do
+      s = Story.make!(
+        :suggested_taggings => [SuggestedTagging.make!],
+        :suggested_titles => [SuggestedTitle.make!]
+      )
+
+      expect {
+        expect {
+          s.destroy
+        }.to change(SuggestedTagging, :count).by(-1)
+      }.to change(SuggestedTitle, :count).by(-1)
+    end
+  end
+
   it "should get a short id" do
     s = Story.make!(:title => "hello", :url => "http://example.com/")
 
