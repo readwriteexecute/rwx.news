@@ -1,6 +1,20 @@
 require "spec_helper"
 
 describe Story do
+
+  describe "self.ready_for_deletion" do
+    it "includes stories older than 1 month" do
+      s = Story.make!(:created_at => 5.months.ago)
+      expect( Story.ready_for_deletion).to include(s)
+    end
+
+    it "does not include stories less than 1 month old" do
+      s = Story.make!(:created_at => 3.weeks.ago)
+
+      expect(Story.ready_for_deletion).to_not include(s)
+    end
+  end
+
   it "should get a short id" do
     s = Story.make!(:title => "hello", :url => "http://example.com/")
 

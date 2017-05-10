@@ -1,4 +1,5 @@
 class Story < ActiveRecord::Base
+  DELETION_INTERVAL = 1.month
   belongs_to :user
   belongs_to :merged_into_story,
     :class_name => "Story",
@@ -19,6 +20,7 @@ class Story < ActiveRecord::Base
     :source => :user
 
   scope :unmerged, -> { where(:merged_story_id => nil) }
+  scope :ready_for_deletion, -> { where('created_at < ?', DELETION_INTERVAL.ago) }
 
   validates_length_of :title, :in => 3..150
   validates_length_of :description, :maximum => (64 * 1024)
