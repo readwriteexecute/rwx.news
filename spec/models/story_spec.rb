@@ -16,6 +16,24 @@ describe Story do
   end
 
   describe "destroy" do
+    it "preserves users karma" do
+      submitter = User.make!
+      upvoter = User.make!
+      commenter = User.make!
+      comment_upvoter = User.make!
+      s = Story.make!(:user_id => submitter.id)
+      Vote.vote_thusly_on_story_or_comment_for_user_because(1, s.id, nil, upvoter.id, nil, true)
+      comment = Comment.make!(:story_id => s.id, :user_id => commenter.id)
+      Vote.vote_thusly_on_story_or_comment_for_user_because(1, s.id, comment.id, comment_upvoter.id, nil, true)
+      expect(submitter.reload.karma).to eq 1
+      expect(commenter.reload.karma).to eq 1
+
+      s.destroy
+
+      expect(submitter.reload.karma).to eq 1
+      expect(commenter.reload.karma).to eq 1
+    end
+
     it "deletes a story's taggings" do
       s = Story.make!(:tags_a => ["tag1"])
 
