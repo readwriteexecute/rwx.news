@@ -3,13 +3,13 @@ require "spec_helper"
 describe Story do
 
   describe "self.ready_for_deletion" do
-    it "includes stories older than 1 month" do
-      s = Story.make!(:created_at => 5.months.ago)
+    it "includes stories updated last updated more than 1 month" do
+      s = Story.make!(:updated_at => 5.months.ago)
       expect( Story.ready_for_deletion).to include(s)
     end
 
-    it "does not include stories less than 1 month old" do
-      s = Story.make!(:created_at => 3.weeks.ago)
+    it "does not include stories last updated less than 1 month ago" do
+      s = Story.make!(:updated_at => 3.weeks.ago)
 
       expect(Story.ready_for_deletion).to_not include(s)
     end
