@@ -1,7 +1,8 @@
 class Comment < ActiveRecord::Base
   belongs_to :user
   belongs_to :story,
-    :inverse_of => :comments
+             :inverse_of => :comments,
+             :touch => true
   has_many :votes,
     :dependent => :delete_all
   belongs_to :parent_comment,
