@@ -101,6 +101,18 @@ span.na {
 	font-style: italic;
 }
 
+span.low-urgency {
+    color:gray;
+}
+
+span.medium-urgency {
+    color: #edac7b;
+}
+
+span.high-urgency {
+    color: #700;
+}
+
 div.shorten_first_p p:first-child {
 	margin-top: 0.5em;
 }
