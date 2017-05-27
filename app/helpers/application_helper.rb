@@ -69,6 +69,28 @@ module ApplicationHelper
     pages
   end
 
+  def time_until_deletion_label(time)
+    end_time = time.seconds.from_now
+    ago = time_ago_in_words(end_time)
+    raw(content_tag(
+          :span,
+          "archival in #{ago}",
+          :title => end_time.strftime("%F %T %z"),
+          :class => urgency_class(time)
+        )
+    )
+  end
+
+  def urgency_class(time)
+    if time.seconds < 1.days
+      "high-urgency"
+    elsif time.seconds < 1.weeks
+      "medium-urgency"
+    else
+      "low-urgency"
+    end
+  end
+
   def time_ago_in_words_label(time, options = {})
     ago = ""
     secs = (Time.now - time).to_i
