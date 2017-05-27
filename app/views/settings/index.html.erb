@@ -1,6 +1,10 @@
 <div class="box wide">
   <div class="legend right">
     <a href="/u/<%= @user.username %>">View Profile</a>
+    |
+    <%= link_to "Logout", { :controller => "login", :action => "logout" },
+      :data => { :confirm => "Are you sure you want to logout?" },
+      :method => "post" %>
   </div>
   <div class="legend">
     Account Settings
@@ -255,11 +259,6 @@
     <div class="boxline">
       <%= f.label :show_avatars, "Show User Avatars:", :class => "required" %>
       <%= f.check_box :show_avatars %>
-    </div>
-
-    <div class="boxline">
-      <%= f.label :hide_dragons, "Hide Dragons:", :class => "required" %>
-      <%= f.check_box :hide_dragons %>
     </div>
 
     <br>

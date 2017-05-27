@@ -44,7 +44,6 @@ class User < ActiveRecord::Base
     s.boolean :show_avatars, :default => true
     s.boolean :show_story_previews, :default => false
     s.boolean :show_submitted_story_threads, :default => false
-    s.boolean :hide_dragons, :default => false
     s.string :totp_secret
     s.string :github_oauth_token
     s.string :github_username
@@ -68,6 +67,8 @@ class User < ActiveRecord::Base
       record.errors.add(attr, "is not permitted")
     end
   end
+
+  scope :active, -> { where(:banned_at => nil, :deleted_at => nil) }
 
   before_save :check_session_token
   before_validation :on => :create do

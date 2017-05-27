@@ -32,6 +32,8 @@ class Comment < ActiveRecord::Base
   # after this many minutes old, a comment cannot be edited
   MAX_EDIT_MINS = (60 * 6)
 
+  SCORE_RANGE_TO_HIDE = (-2 .. 4)
+
   validate do
     self.comment.to_s.strip == "" &&
       errors.add(:comment, "cannot be blank.")
@@ -53,8 +55,8 @@ class Comment < ActiveRecord::Base
   end
 
   def self.arrange_for_user(user)
-    parents = self.order("is_dragon ASC, (upvotes - downvotes) < 0 ASC, " <<
-      "confidence DESC").group_by(&:parent_comment_id)
+    parents = self.order("(upvotes - downvotes) < 0 ASC, confidence DESC").
+      group_by(&:parent_comment_id)
 
     # top-down list of comments, regardless of indent level
     ordered = []
@@ -169,36 +171,6 @@ class Comment < ActiveRecord::Base
     else
       self.thread_id = Keystore.incremented_value_for("thread_id")
     end
-  end
-
-  def become_dragon_for_user(user)
-    Comment.record_timestamps = false
-
-    self.is_dragon = true
-
-    m = Moderation.new
-    m.comment_id = self.id
-    m.moderator_user_id = user.id
-    m.action = "turned into a dragon"
-    m.save
-
-    self.save(:validate => false)
-    Comment.record_timestamps = true
-  end
-
-  def remove_dragon_for_user(user)
-    Comment.record_timestamps = false
-
-    self.is_dragon = false
-
-    m = Moderation.new
-    m.comment_id = self.id
-    m.moderator_user_id = user.id
-    m.action = "slayed dragon"
-    m.save
-
-    self.save(:validate => false)
-    Comment.record_timestamps = true
   end
 
   # http://evanmiller.org/how-not-to-sort-by-average-rating.html
@@ -431,8 +403,22 @@ class Comment < ActiveRecord::Base
     self.upvotes - self.downvotes
   end
 
+  def score_for_user(u)
+    if self.showing_downvotes_for_user?(u)
+      score
+    else
+      "-"
+    end
+  end
+
   def short_id_url
     Rails.application.root_url + "c/#{self.short_id}"
+  end
+
+  def showing_downvotes_for_user?(u)
+    return (u && u.is_moderator?) ||
+      (self.created_at && self.created_at < 36.hours.ago) ||
+      !SCORE_RANGE_TO_HIDE.include?(self.score)
   end
 
   def to_param

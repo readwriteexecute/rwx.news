@@ -116,7 +116,12 @@ var _Lobsters = Class.extend({
 
     var li = $(voterEl).closest(".story, .comment");
     var scoreDiv = li.find("div.score").get(0);
-    var score = parseInt(scoreDiv.innerHTML);
+    var score = 0;
+    var showScore = true;
+    if (scoreDiv.innerHTML == "-")
+      showScore = false;
+    else
+      score = parseInt(scoreDiv.innerHTML);
     var action = "";
 
     if (li.hasClass("upvoted") && point > 0) {
@@ -150,7 +155,8 @@ var _Lobsters = Class.extend({
       action = "downvote";
     }
 
-    scoreDiv.innerHTML = score;
+    if (showScore)
+      scoreDiv.innerHTML = score;
 
     if (action == "upvote" || action == "unvote") {
       li.find(".reason").html("");
@@ -333,16 +339,6 @@ $(document).ready(function() {
     return Lobsters.moderateStory(this);
   }),
 
-  $(".toggle_dragons").click(function(a) {
-    var c = $(".dragon_threads").first();
-    if (c) {
-      if (c.hasClass("hidden"))
-        c.removeClass("hidden");
-      else
-        c.addClass("hidden");
-    }
-  }),
-
   $(document).on("click", "a.comment_replier", function() {
     if (!Lobsters.curUser) {
       Lobsters.bounceToLogin();
@@ -419,25 +415,6 @@ $(document).ready(function() {
       $.post("/comments/" + $(li).attr("data-shortid") + "/undelete",
       function(d) {
         $(li).replaceWith(d);
-      });
-    }
-  });
-
-  $(document).on("click", "a.comment_dragon", function() {
-    if (confirm("Are you sure you want to mark this thread?")) {
-      var li = $(this).closest(".comment");
-      $.post("/comments/" + $(li).attr("data-shortid") + "/dragon",
-      function(d) {
-        window.location.reload();
-      });
-    }
-  });
-  $(document).on("click", "a.comment_undragon", function() {
-    if (confirm("Are you sure you want to unmark this thread?")) {
-      var li = $(this).closest(".comment");
-      $.post("/comments/" + $(li).attr("data-shortid") + "/undragon",
-      function(d) {
-        window.location.reload();
       });
     }
   });
