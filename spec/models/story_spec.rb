@@ -15,6 +15,15 @@ describe Story do
     end
   end
 
+  describe "time_until_deletion" do
+    it "calculates time until deletion" do
+      now = Time.now
+      s = Story.make!(:updated_at => now - 2.weeks)
+
+      expect(s.time_until_deletion(now)).to be_within(0.1).of(2.weeks.to_f)
+    end
+  end
+
   describe "destroy" do
     it "preserves users karma" do
       submitter = User.make!

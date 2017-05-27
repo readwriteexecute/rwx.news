@@ -1,5 +1,5 @@
 class Story < ActiveRecord::Base
-  DELETION_INTERVAL = 1.month
+  DELETION_INTERVAL = 4.weeks
   belongs_to :user
   belongs_to :merged_into_story,
     :class_name => "Story",
@@ -153,6 +153,11 @@ class Story < ActiveRecord::Base
 
   def self.votes_cast_type
     Story.connection.adapter_name.match(/mysql/i) ? "signed" : "integer"
+  end
+
+  def time_until_deletion(now = Time.now)
+    delete_at = updated_at + DELETION_INTERVAL
+    delete_at - now
   end
 
   def archive_url
