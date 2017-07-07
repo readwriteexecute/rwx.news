@@ -1,5 +1,5 @@
 class InvitationsController < ApplicationController
-  before_filter :require_logged_in_user,
+  before_action :require_logged_in_user,
     :except => [ :create_by_request, :confirm_email ]
 
   def build
@@ -12,6 +12,12 @@ class InvitationsController < ApplicationController
   end
 
   def index
+    if !@user.can_see_invitation_requests?
+      flash[:error] = "Your account is not permitted to view invitation " <<
+        "requests."
+      return redirect_to "/"
+    end
+
     @invitation_requests = InvitationRequest.where(:is_verified => true)
   end
 
@@ -78,6 +84,12 @@ class InvitationsController < ApplicationController
   end
 
   def send_for_request
+    if !@user.can_see_invitation_requests?
+      flash[:error] = "Your account is not permitted to view invitation " <<
+        "requests."
+      return redirect_to "/"
+    end
+
     if !(ir = InvitationRequest.where(:code => params[:code].to_s).first)
       flash[:error] = "Invalid or expired invitation request"
       return redirect_to "/invitations"
@@ -86,18 +98,20 @@ class InvitationsController < ApplicationController
     i = Invitation.new
     i.user_id = @user.id
     i.email = ir.email
-
     i.save!
     i.send_email
     ir.destroy!
     flash[:success] = "Successfully e-mailed invitation to " <<
       ir.name.to_s << "."
 
+    Rails.logger.info "[u#{@user.id}] sent invitiation for request " <<
+      ir.inspect
+
     return redirect_to "/invitations"
   end
 
   def delete_request
-    if !@user.is_moderator?
+    if !@user.can_see_invitation_requests?
       return redirect_to "/invitations"
     end
 
@@ -109,6 +123,9 @@ class InvitationsController < ApplicationController
     ir.destroy!
     flash[:success] = "Successfully deleted invitation request from " <<
       ir.name.to_s << "."
+
+    Rails.logger.info "[u#{@user.id}] deleted invitation request " <<
+      "from #{ir.inspect}"
 
     return redirect_to "/invitations"
   end

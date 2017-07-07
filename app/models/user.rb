@@ -78,7 +78,8 @@ class User < ActiveRecord::Base
 
   BANNED_USERNAMES = [ "admin", "administrator", "contact", "fraud", "guest",
     "help", "hostmaster", "mailer-daemon", "moderator", "moderators", "nobody",
-    "postmaster", "root", "security", "support", "sysop", "webmaster" ]
+    "postmaster", "root", "security", "support", "sysop", "webmaster",
+    "enable", "new", "signup", ]
 
   # days old accounts are considered new for
   NEW_USER_DAYS = 7
@@ -91,6 +92,9 @@ class User < ActiveRecord::Base
 
   # minimum karma required to be able to submit new stories
   MIN_KARMA_TO_SUBMIT_STORIES = -4
+
+  # minimum karma required to process invitation requests
+  MIN_KARMA_FOR_INVITATION_REQUESTS = MIN_KARMA_TO_DOWNVOTE
 
   def self.username_regex_s
     "/^" + VALID_USERNAME.to_s.gsub(/(\?-mix:|\(|\))/, "") + "$/"
@@ -217,6 +221,11 @@ class User < ActiveRecord::Base
 
   def can_offer_suggestions?
     !self.is_new? && (self.karma >= MIN_KARMA_TO_SUGGEST)
+  end
+
+  def can_see_invitation_requests?
+    can_invite? && (self.is_moderator? ||
+      (self.karma >= MIN_KARMA_FOR_INVITATION_REQUESTS))
   end
 
   def can_submit_stories?

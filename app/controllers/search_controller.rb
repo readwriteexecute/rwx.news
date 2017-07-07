@@ -21,12 +21,7 @@ class SearchController < ApplicationController
       end
 
       if @search.valid?
-        begin
-          @search.search_for_user!(@user)
-        rescue ThinkingSphinx::ConnectionError
-          flash[:error] = "Sorry, but the search engine is currently out " <<
-            "of order"
-        end
+        @search.search_for_user!(@user)
       end
     end
 

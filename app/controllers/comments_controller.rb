@@ -2,18 +2,18 @@ class CommentsController < ApplicationController
   COMMENTS_PER_PAGE = 20
 
   # for rss feeds, load the user's tag filters if a token is passed
-  before_filter :find_user_from_rss_token, :only => [ :index ]
-  before_filter :require_logged_in_user, :only => [ :index ]
-  before_filter :require_logged_in_user_or_400,
+  before_action :find_user_from_rss_token, :only => [ :index ]
+  before_action :require_logged_in_user, :only => [ :index ]
+  before_action :require_logged_in_user_or_400,
     :only => [ :create, :preview, :upvote, :downvote, :unvote ]
 
   # for rss feeds, load the user's tag filters if a token is passed
-  before_filter :find_user_from_rss_token, :only => [ :index ]
+  before_action :find_user_from_rss_token, :only => [ :index ]
 
   def create
     if !(story = Story.where(:short_id => params[:story_id]).first) ||
     story.is_gone?
-      return render :text => "can't find story", :status => 400
+      return render :plain => "can't find story", :status => 400
     end
 
     comment = story.comments.build
@@ -62,7 +62,7 @@ class CommentsController < ApplicationController
 
   def show
     if !((comment = find_comment) && comment.is_editable_by_user?(@user))
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     render :partial => "comment", :layout => false,
@@ -71,7 +71,7 @@ class CommentsController < ApplicationController
 
   def show_short_id
     if !(comment = find_comment)
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     render :json => comment.as_json
@@ -81,13 +81,13 @@ class CommentsController < ApplicationController
     if comment = find_comment
       return redirect_to comment.url
     else
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
   end
 
   def edit
     if !((comment = find_comment) && comment.is_editable_by_user?(@user))
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     render :partial => "commentbox", :layout => false,
@@ -96,7 +96,7 @@ class CommentsController < ApplicationController
 
   def reply
     if !(parent_comment = find_comment)
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     comment = Comment.new
@@ -109,7 +109,7 @@ class CommentsController < ApplicationController
 
   def delete
     if !((comment = find_comment) && comment.is_deletable_by_user?(@user))
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     comment.delete_for_user(@user, params[:reason])
@@ -120,7 +120,7 @@ class CommentsController < ApplicationController
 
   def undelete
     if !((comment = find_comment) && comment.is_undeletable_by_user?(@user))
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     comment.undelete_for_user(@user)
@@ -131,7 +131,7 @@ class CommentsController < ApplicationController
 
   def update
     if !((comment = find_comment) && comment.is_editable_by_user?(@user))
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     comment.comment = params[:comment]
@@ -156,43 +156,43 @@ class CommentsController < ApplicationController
 
   def unvote
     if !(comment = find_comment)
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     Vote.vote_thusly_on_story_or_comment_for_user_because(0, comment.story_id,
       comment.id, @user.id, nil)
 
-    render :text => "ok"
+    render :plain => "ok"
   end
 
   def upvote
     if !(comment = find_comment)
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     Vote.vote_thusly_on_story_or_comment_for_user_because(1, comment.story_id,
       comment.id, @user.id, params[:reason])
 
-    render :text => "ok"
+    render :plain => "ok"
   end
 
   def downvote
     if !(comment = find_comment)
-      return render :text => "can't find comment", :status => 400
+      return render :plain => "can't find comment", :status => 400
     end
 
     if !Vote::COMMENT_REASONS[params[:reason]]
-      return render :text => "invalid reason", :status => 400
+      return render :plain => "invalid reason", :status => 400
     end
 
     if !@user.can_downvote?(comment)
-      return render :text => "not permitted to downvote", :status => 400
+      return render :plain => "not permitted to downvote", :status => 400
     end
 
     Vote.vote_thusly_on_story_or_comment_for_user_because(-1, comment.story_id,
       comment.id, @user.id, params[:reason])
 
-    render :text => "ok"
+    render :plain => "ok"
   end
 
   def index
@@ -269,7 +269,7 @@ class CommentsController < ApplicationController
     ).includes(
       :user, :story, :hat, :votes => :user
     ).arrange_for_user(
-      @showing_user
+      @user
     )
 
     comments_by_thread_id = comments.group_by(&:thread_id)
