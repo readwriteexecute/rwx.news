@@ -7,11 +7,10 @@ describe CommentsController do
     it "updates the updated_at for the parent story" do
       request.session[:u] = user.session_token
       expect {
-        post :create,
-            :story_id => story.short_id, :comment => "Hello"
+        post(:create, params: {story_id: story.short_id, comment: "Hello"})
       }.to change{ story.reload.updated_at }
 
-      response.should be_success
+      expect(response).to be_success
     end
   end
 end
