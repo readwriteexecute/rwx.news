@@ -15,6 +15,20 @@ describe Story do
     end
   end
 
+  describe "self.destroy_old_stories" do
+    it "deletes the story's comments" do
+      s = Story.make!(
+        :comments => [Comment.make!]
+      )
+
+      s.update_attributes!(:updated_at => 5.months.ago)
+
+      expect {
+        Story.destroy_old_stories
+      }.to change(Comment, :count).by(-1)
+    end
+  end
+
   describe "time_until_deletion" do
     it "calculates time until deletion" do
       now = Time.now
