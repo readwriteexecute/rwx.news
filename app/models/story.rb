@@ -321,7 +321,7 @@ class Story < ActiveRecord::Base
       self.story_cache
     end
 
-    if chars > 0
+    if chars > 0 && s.to_s.length > chars
       # remove last truncated word
       s = s.to_s[0, chars].gsub(/ [^ ]*\z/, "")
     end
@@ -425,7 +425,7 @@ class Story < ActiveRecord::Base
   end
 
   def is_gone?
-    is_expired?
+    is_expired? || self.user.is_banned?
   end
 
   def is_hidden_by_user?(user)
@@ -518,6 +518,10 @@ class Story < ActiveRecord::Base
   def merge_story_short_id=(sid)
     self.merged_story_id = sid.present??
       Story.where(:short_id => sid).first.id : nil
+  end
+
+  def merge_story_short_id
+    self.merged_story_id ? self.merged_into_story.try(:short_id) : nil
   end
 
   def recalculate_hotness!

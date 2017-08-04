@@ -1,18 +1,18 @@
 class HomeController < ApplicationController
   # for rss feeds, load the user's tag filters if a token is passed
-  before_filter :find_user_from_rss_token, :only => [ :index, :newest ]
-  before_filter { @page = page }
-  before_filter :require_logged_in_user
+  before_action :find_user_from_rss_token, :only => [ :index, :newest ]
+  before_action { @page = page }
+  before_action :require_logged_in_user
 
   def four_oh_four
     begin
       @title = "Resource Not Found"
       render :action => "404", :status => 404
     rescue ActionView::MissingTemplate
-      render :text => "<div class=\"box wide\">" <<
+      render :html => ("<div class=\"box wide\">" <<
         "<div class=\"legend\">404</div>" <<
         "Resource not found" <<
-        "</div>", :layout => "application"
+        "</div>").html_safe, :layout => "application"
     end
   end
 
@@ -21,9 +21,9 @@ class HomeController < ApplicationController
       @title = "About"
       render :action => "about"
     rescue ActionView::MissingTemplate
-      render :text => "<div class=\"box wide\">" <<
+      render :html => ("<div class=\"box wide\">" <<
         "A mystery." <<
-        "</div>", :layout => "application"
+        "</div>").html_safe, :layout => "application"
     end
   end
 
@@ -32,10 +32,10 @@ class HomeController < ApplicationController
       @title = "Chat"
       render :action => "chat"
     rescue ActionView::MissingTemplate
-      render :text => "<div class=\"box wide\">" <<
+      render :html => ("<div class=\"box wide\">" <<
         "<div class=\"legend\">Chat</div>" <<
         "Keep it on-site" <<
-        "</div>", :layout => "application"
+        "</div>").html_safe, :layout => "application"
     end
   end
 
@@ -44,7 +44,7 @@ class HomeController < ApplicationController
       @title = "Privacy"
       render :action => "privacy"
     rescue ActionView::MissingTemplate
-      render :text => "<div class=\"box wide\">" <<
+      render :html => "<div class=\"box wide\">" <<
         "You apparently have no privacy." <<
         "</div>", :layout => "application"
     end
@@ -77,11 +77,15 @@ class HomeController < ApplicationController
     respond_to do |format|
       format.html { render :action => "index" }
       format.rss {
-        if @user && params[:token].present?
+        if @user
           @title = "Private feed for #{@user.username}"
+          render :action => "rss", :layout => false
+        else
+          content = Rails.cache.fetch("rss", :expires_in => (60 * 2)) {
+            render_to_string :action => "rss", :layout => false
+          }
+          render :plain => content, :layout => false
         end
-
-        render :action => "rss", :layout => false
       }
       format.json { render :json => @stories }
     end

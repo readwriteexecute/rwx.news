@@ -160,13 +160,10 @@ Lobsters::Application.routes.draw do
 
     get "/moderations" => "moderations#index"
     get "/moderations/page/:page" => "moderations#index"
+    get "/moderators" => "users#tree", :moderators => true
 
     get "/privacy" => "home#privacy"
     get "/about" => "home#about"
     get "/chat" => "home#chat"
-
-    if defined?(BbsController) || Rails.env.development?
-      get "/bbs" => "bbs#index"
-    end
   end
 end
