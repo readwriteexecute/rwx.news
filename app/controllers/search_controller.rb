@@ -1,5 +1,5 @@
 class SearchController < ApplicationController
-  before_filter :require_logged_in_user
+  before_action :require_logged_in_user
 
   def index
     @title = "Search"
