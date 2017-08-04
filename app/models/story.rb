@@ -99,6 +99,10 @@ class Story < ActiveRecord::Base
     check_tags
   end
 
+  def self.destroy_old_stories
+    self.ready_for_deletion.each(&:destroy)
+  end
+
   def self.find_similar_by_url(url)
     urls = [ url.to_s ]
     urls2 = [ url.to_s ]

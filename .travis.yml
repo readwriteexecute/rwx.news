@@ -1,0 +1,14 @@
+sudo: required
+language: generic
+
+services:
+  - docker
+
+before_script:
+  - sudo service postgresql stop
+  - while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do sleep 1; done
+  - docker-compose run web rake db:create
+  - docker-compose run web rake db:schema:load
+
+script:
+  - docker-compose run web rake
