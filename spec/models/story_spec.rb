@@ -34,7 +34,7 @@ describe Story do
       now = Time.now
       s = Story.make!(:updated_at => now - 2.weeks)
 
-      expect(s.time_until_deletion(now)).to be_within(0.1).of(2.weeks.to_f)
+      expect(s.time_until_deletion(now)).to be_within(1.hours).of(2.weeks.to_f)
     end
   end
 
