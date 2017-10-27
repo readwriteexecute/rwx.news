@@ -1,4 +1,7 @@
 Lobsters::Application.routes.draw do
+  namespace :api do
+    resources :stories, only: [:create]
+  end
   scope :format => "html" do
     root :to => "home#index",
       :protocol => (Rails.application.config.force_ssl ? "https://" : "http://"),
