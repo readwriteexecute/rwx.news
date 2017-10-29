@@ -1,6 +1,7 @@
 Lobsters::Application.routes.draw do
   namespace :api do
     resources :stories, only: [:create]
+    resources :tags, only: [:index]
   end
   scope :format => "html" do
     root :to => "home#index",
